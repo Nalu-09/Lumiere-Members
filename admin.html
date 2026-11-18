@@ -393,7 +393,9 @@ color:#f3efe6;
       <h1 class="title">Lumière Dining</h1>
       <p class="subtitle">管理者メニュー</p>
 
-        <div class="menu">
+        
+<div class="menu" id="adminMainMenu" style="visibility:hidden;">
+
   <button
     id="menuCheckin"
     onclick="openCheckinLiff()"
@@ -4176,11 +4178,20 @@ if (!data.ok) {
   return;
 }
 
-    currentAdminAuth = data;
+    
+currentAdminAuth = data;
 
-    applyAdminPermissions(
-      data
-    );
+// すべてのボタンの権限を確定
+applyAdminPermissions(data);
+
+// 権限判定後、管理メニューを同時表示
+const adminMainMenu =
+  document.getElementById("adminMainMenu");
+
+if (adminMainMenu) {
+  adminMainMenu.style.visibility = "visible";
+}
+
 
   } catch (error) {
     document.body.innerHTML =
