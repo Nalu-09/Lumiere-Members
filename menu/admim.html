@@ -1,0 +1,452 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <?!= include('Styles'); ?>
+</head>
+
+<body style="background:#f7f5f0">
+  <main class="admin">
+
+    <div class="eyebrow">NALU — 09</div>
+
+    <h1>Menu Administration</h1>
+
+    <p>
+      <small>
+        ブランド共通メニュー管理。
+        保存すると選択したブランドの料理一覧を更新します。
+      </small>
+    </p>
+
+    <!-- 管理認証 -->
+    <div id="login">
+      <label>
+        管理用アクセスキー
+
+        <input
+          id="key"
+          type="password"
+          autocomplete="off"
+          placeholder="MENU_ADMIN_KEY"
+        >
+      </label>
+
+      <div class="actions">
+        <button onclick="load()">
+          管理画面を開く
+        </button>
+      </div>
+    </div>
+
+    <!-- 管理画面 -->
+    <div id="panel" hidden>
+
+      <div class="admin-controls">
+        <label>
+          ブランド
+          <select
+            id="brand"
+            onchange="render()"
+          ></select>
+        </label>
+
+        <label>
+          操作
+          <div class="actions">
+            <button
+              class="btn-secondary"
+              onclick="addDish()"
+            >
+              ＋ 料理を追加
+            </button>
+
+            <button onclick="save()">
+              このブランドを保存
+            </button>
+          </div>
+        </label>
+      </div>
+
+      <p id="help">
+        <small>
+          料理の削除は「削除」、
+          順番は↑↓で変更できます。
+          カテゴリーと独自名称は既存の
+          スプレッドシートの入力規則から取得します。
+        </small>
+      </p>
+
+      <div id="rows"></div>
+
+      <button onclick="save()">
+        このブランドを保存
+      </button>
+    </div>
+
+    <p id="status"></p>
+  </main>
+
+  <script>
+    let current = null;
+    let adminKey = '';
+
+    const brandSelect = document.getElementById(
+      'brand'
+    );
+
+    function state(message, error = false) {
+      const el = document.getElementById('status');
+
+      el.textContent = message;
+      el.className = error ? 'error' : '';
+    }
+
+    // 管理画面へのログイン
+    function load() {
+      const key = document.getElementById(
+        'key'
+      ).value.trim();
+
+      if (!key) {
+        return state(
+          'アクセスキーを入力してください',
+          true
+        );
+      }
+
+      google.script.run
+        .withSuccessHandler(data => {
+          current = data;
+          adminKey = key;
+
+          document.getElementById(
+            'key'
+          ).value = '';
+
+          document.getElementById(
+            'login'
+          ).hidden = true;
+
+          document.getElementById(
+            'panel'
+          ).hidden = false;
+
+          brandSelect.replaceChildren();
+
+          for (const brand of data.brands) {
+            const option = document.createElement(
+              'option'
+            );
+
+            option.value = brand.name;
+            option.textContent = brand.name;
+
+            brandSelect.append(option);
+          }
+
+          render();
+          state('');
+        })
+        .withFailureHandler(error => {
+          state(
+            error.message ||
+            '認証に失敗しました',
+            true
+          );
+        })
+        .getAdminData(key);
+    }
+
+    // プルダウン作成
+    function optionSelect(items, value) {
+      const select = document.createElement(
+        'select'
+      );
+
+      const options = [
+        ...new Set([
+          '',
+          ...items,
+          value
+        ].filter(item => item !== undefined))
+      ];
+
+      for (const item of options) {
+        const option = document.createElement(
+          'option'
+        );
+
+        option.value = item;
+        option.textContent =
+          item || '選択してください';
+
+        select.append(option);
+      }
+
+      select.value = value || '';
+
+      return select;
+    }
+
+    function formField(label, input) {
+      const element = document.createElement(
+        'label'
+      );
+
+      element.textContent = label;
+      element.append(input);
+
+      return element;
+    }
+
+    // 選択ブランドの料理一覧
+    function render() {
+      const wrap = document.getElementById(
+        'rows'
+      );
+
+      wrap.replaceChildren();
+
+      current.dishes
+        .filter(
+          dish => dish.brand === brandSelect.value
+        )
+        .sort(
+          (a, b) => a.order - b.order
+        )
+        .forEach(
+          dish => makeRow(dish)
+        );
+
+      renumber();
+    }
+
+    // 料理の編集欄を作成
+    function makeRow(data) {
+      const box = document.createElement('div');
+      box.className = 'admin-row';
+
+      const cols = document.createElement('div');
+      cols.className = 'cols';
+
+      const order = document.createElement('input');
+
+      order.type = 'number';
+      order.min = '1';
+      order.value = data.order || 1;
+      order.className = 'order';
+
+      const category = optionSelect(
+        current.options.categories,
+        data.category
+      );
+
+      category.className = 'category-field';
+
+      const naluName = optionSelect(
+        current.options.naluNames,
+        data.naluName || '料理名を記載'
+      );
+
+      naluName.className = 'nalu-field';
+
+      cols.append(
+        formField('表示順', order),
+        formField('カテゴリー', category),
+        formField('Nalu-09の名称', naluName)
+      );
+
+      const name = document.createElement(
+        'textarea'
+      );
+
+      name.className = 'name-field';
+      name.value = data.name || '';
+
+      box.append(
+        cols,
+        formField(
+          '料理名（改行可）',
+          name
+        )
+      );
+
+      const actions = document.createElement(
+        'div'
+      );
+
+      actions.className = 'actions';
+
+      // 上へ移動
+      const up = document.createElement(
+        'button'
+      );
+
+      up.textContent = '↑';
+      up.className = 'btn-secondary';
+
+      up.onclick = () => {
+        if (box.previousElementSibling) {
+          box.parentNode.insertBefore(
+            box,
+            box.previousElementSibling
+          );
+        }
+
+        renumber();
+      };
+
+      // 下へ移動
+      const down = document.createElement(
+        'button'
+      );
+
+      down.textContent = '↓';
+      down.className = 'btn-secondary';
+
+      down.onclick = () => {
+        if (box.nextElementSibling) {
+          box.parentNode.insertBefore(
+            box.nextElementSibling,
+            box
+          );
+        }
+
+        renumber();
+      };
+
+      // 削除
+      const del = document.createElement(
+        'button'
+      );
+
+      del.textContent = '削除';
+      del.className = 'btn-danger';
+
+      del.onclick = () => {
+        box.remove();
+        renumber();
+      };
+
+      actions.append(
+        up,
+        down,
+        del
+      );
+
+      box.append(actions);
+
+      document.getElementById(
+        'rows'
+      ).append(box);
+    }
+
+    // 表示順を振り直す
+    function renumber() {
+      document.querySelectorAll(
+        '.admin-row .order'
+      ).forEach((input, i) => {
+        input.value = i + 1;
+      });
+    }
+
+    // 料理追加
+    function addDish() {
+      makeRow({
+        order:
+          document.querySelectorAll(
+            '.admin-row'
+          ).length + 1,
+
+        category: '',
+        naluName: '料理名を記載',
+        name: ''
+      });
+
+      renumber();
+    }
+
+    // 保存
+    function save() {
+      const brand = brandSelect.value;
+
+      const items = [
+        ...document.querySelectorAll(
+          '.admin-row'
+        )
+      ].map((box, i) => ({
+        order: i + 1,
+
+        category:
+          box.querySelector(
+            '.category-field'
+          ).value,
+
+        naluName:
+          box.querySelector(
+            '.nalu-field'
+          ).value,
+
+        name:
+          box.querySelector(
+            '.name-field'
+          ).value
+      }));
+
+      if (
+        items.some(
+          item => !item.name.trim()
+        )
+      ) {
+        return state(
+          '料理名が空欄の行があります',
+          true
+        );
+      }
+
+      const confirmed = confirm(
+        `${brand} の料理を ${items.length} 件で更新します。よろしいですか？`
+      );
+
+      if (!confirmed) return;
+
+      state('保存中…');
+
+      google.script.run
+        .withSuccessHandler(info => {
+          state(
+            `${info.saved}件保存しました`
+          );
+
+          google.script.run
+            .withSuccessHandler(data => {
+              current = data;
+              brandSelect.value = brand;
+              render();
+            })
+            .withFailureHandler(error => {
+              state(
+                error.message,
+                true
+              );
+            })
+            .getAdminData(adminKey);
+        })
+        .withFailureHandler(error => {
+          state(
+            error.message ||
+            '保存できませんでした',
+            true
+          );
+        })
+        .saveBrandMenu(
+          adminKey,
+          brand,
+          items
+        );
+    }
+  </script>
+</body>
+</html>
