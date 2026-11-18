@@ -22,7 +22,7 @@ const NaluMenuAPI = (() => {
   // =========================================
 
   const API_URL =
-    "https://script.google.com/macros/s/ここにデプロイID/exec";
+    "https://script.google.com/macros/s/AKfycbzuXAKRg9B5AuPOi2ppj9VuaN8qM01vzLlLnIBFjWiNnjKh7rxzmB_BEG2-U0qAMmM8/exec";
 
   // =========================================
   // 2. API通信
