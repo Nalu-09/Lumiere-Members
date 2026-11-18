@@ -3,450 +3,938 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <?!= include('Styles'); ?>
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <title>Nalu-09 | Menu Administration</title>
+
+  <!-- GitHub Pages用のCSS -->
+  <link rel="stylesheet" href="./style.css">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect"
+        href="https://fonts.googleapis.com">
+  <link rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Shippori+Mincho:wght@400;500&family=Zen+Old+Mincho:wght@400;500&display=swap"
+    rel="stylesheet"
+  >
+
+  <!-- GitHub PagesからGASへの通信 -->
+  <script src="./api.js"></script>
+
+  <style>
+    body {
+      background: #F7F5F0 !important;
+      color: #302A26 !important;
+      font-family:
+        "Shippori Mincho",
+        "Hiragino Mincho ProN",
+        serif;
+    }
+
+    .admin {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 36px 20px 80px;
+      text-align: left;
+    }
+
+    .admin-header {
+      text-align: center;
+      margin-bottom: 34px;
+    }
+
+    .admin-header h1 {
+      font-family:
+        "Cormorant Garamond",
+        Georgia,
+        serif;
+      font-size: clamp(34px, 7vw, 45px);
+      font-weight: 400;
+      margin: 14px 0;
+    }
+
+    .admin-description {
+      font-size: 12px;
+      line-height: 1.9;
+      color: #746756;
+    }
+
+    .admin-card {
+      background: #FFFFFF;
+      border: 1px solid #DDD5C9;
+      border-radius: 14px;
+      padding: 22px;
+      margin-bottom: 20px;
+    }
+
+    .admin label {
+      display: block;
+      font-size: 13px;
+      color: #453D35;
+      margin-bottom: 12px;
+    }
+
+    .admin input,
+    .admin select,
+    .admin textarea {
+      display: block;
+      width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+      margin-top: 8px;
+      padding: 12px;
+      background: #FFFFFF;
+      color: #302A26;
+      border: 1px solid #CCC3B6;
+      border-radius: 8px;
+      font-size: 15px;
+      font-family:
+        "Shippori Mincho",
+        serif;
+    }
+
+    .admin textarea {
+      resize: vertical;
+      min-height: 100px;
+      line-height: 1.8;
+      white-space: pre-wrap;
+    }
+
+    .admin button {
+      min-height: 44px;
+      border: 1px solid #302A26;
+      border-radius: 999px;
+      background: #302A26;
+      color: #FFFFFF;
+      font-size: 13px;
+      cursor: pointer;
+      padding: 11px 20px;
+    }
+
+    .admin button:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    .admin .btn-secondary {
+      background: transparent;
+      color: #302A26;
+    }
+
+    .admin .btn-danger {
+      background: transparent;
+      color: #9D4B4B;
+      border-color: #B98787;
+    }
+
+    .admin .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .admin-controls {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .admin-row {
+      background: #FFFFFF;
+      border: 1px solid #DDD5C9;
+      border-radius: 14px;
+      padding: 20px;
+      margin: 16px 0;
+    }
+
+    .admin-row .cols {
+      display: grid;
+      grid-template-columns: 80px 1fr 1fr;
+      gap: 12px;
+    }
+
+    .admin-row-title {
+      color: #A18D70;
+      font-family:
+        "Cormorant Garamond",
+        Georgia,
+        serif;
+      font-size: 21px;
+      margin-bottom: 18px;
+    }
+
+    .admin-message {
+      white-space: pre-wrap;
+      font-size: 13px;
+      line-height: 1.8;
+      margin-top: 18px;
+      color: #746756;
+    }
+
+    .admin-message.error {
+      color: #A83232;
+    }
+
+    .admin-message.success {
+      color: #326645;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    @media (max-width: 640px) {
+      .admin {
+        padding: 24px 15px 60px;
+      }
+
+      .admin-card,
+      .admin-row {
+        padding: 16px;
+      }
+
+      .admin-row .cols {
+        grid-template-columns: 1fr;
+        gap: 2px;
+      }
+
+      .admin .actions button {
+        flex: 1;
+      }
+    }
+  </style>
 </head>
 
-<body style="background:#f7f5f0">
+<body>
+
   <main class="admin">
 
-    <div class="eyebrow">NALU — 09</div>
+    <header class="admin-header">
+      <div class="eyebrow">NALU — 09</div>
 
-    <h1>Menu Administration</h1>
+      <h1>Menu Administration</h1>
 
-    <p>
-      <small>
-        ブランド共通メニュー管理。
-        保存すると選択したブランドの料理一覧を更新します。
-      </small>
-    </p>
+      <p class="admin-description">
+        Nalu-09 会員制ブランド<br>
+        コースメニュー管理
+      </p>
+    </header>
 
-    <!-- 管理認証 -->
-    <div id="login">
-      <label>
+    <!-- 管理者認証 -->
+    <section id="login" class="admin-card">
+
+      <label for="key">
         管理用アクセスキー
-
-        <input
-          id="key"
-          type="password"
-          autocomplete="off"
-          placeholder="MENU_ADMIN_KEY"
-        >
       </label>
 
+      <input
+        id="key"
+        type="password"
+        autocomplete="off"
+        placeholder="アクセスキーを入力"
+      >
+
       <div class="actions">
-        <button onclick="load()">
+        <button
+          type="button"
+          id="loginButton"
+          onclick="loadMenuAdmin()"
+        >
           管理画面を開く
         </button>
       </div>
-    </div>
 
-    <!-- 管理画面 -->
-    <div id="panel" hidden>
+    </section>
 
-      <div class="admin-controls">
-        <label>
-          ブランド
-          <select
-            id="brand"
-            onchange="render()"
-          ></select>
-        </label>
+    <!-- メニュー管理 -->
+    <section id="panel" hidden>
 
-        <label>
-          操作
-          <div class="actions">
-            <button
-              class="btn-secondary"
-              onclick="addDish()"
-            >
-              ＋ 料理を追加
-            </button>
+      <div class="admin-card">
 
-            <button onclick="save()">
-              このブランドを保存
-            </button>
-          </div>
-        </label>
+        <div class="admin-controls">
+
+          <label for="brand">
+            ブランド名称
+
+            <select
+              id="brand"
+              onchange="renderMenuAdmin()"
+            ></select>
+          </label>
+
+        </div>
+
+        <p class="admin-description">
+          カテゴリーとNalu-09の名称は、
+          Lumière Masterの設定から取得します。<br>
+          「料理名を記載」を選択した場合、
+          会員向け画面には料理名のみ表示します。
+        </p>
+
+        <div class="actions">
+
+          <button
+            type="button"
+            class="btn-secondary"
+            onclick="addMenuDish()"
+          >
+            ＋ 料理を追加
+          </button>
+
+          <button
+            type="button"
+            class="save-action"
+            onclick="saveMenuAdmin()"
+          >
+            変更を保存する
+          </button>
+
+        </div>
       </div>
-
-      <p id="help">
-        <small>
-          料理の削除は「削除」、
-          順番は↑↓で変更できます。
-          カテゴリーと独自名称は既存の
-          スプレッドシートの入力規則から取得します。
-        </small>
-      </p>
 
       <div id="rows"></div>
 
-      <button onclick="save()">
-        このブランドを保存
-      </button>
-    </div>
+      <div class="actions">
 
-    <p id="status"></p>
+        <button
+          type="button"
+          class="save-action"
+          onclick="saveMenuAdmin()"
+        >
+          このブランドを保存
+        </button>
+
+      </div>
+
+    </section>
+
+    <p
+      id="status"
+      class="admin-message"
+      role="status"
+      aria-live="polite"
+    ></p>
+
   </main>
 
   <script>
-    let current = null;
-    let adminKey = '';
+    "use strict";
 
-    const brandSelect = document.getElementById(
-      'brand'
-    );
+    let menuAdminData = null;
+    let menuAdminKey = "";
+    let menuAdminBusy = false;
 
-    function state(message, error = false) {
-      const el = document.getElementById('status');
+    const brandSelect =
+      document.getElementById("brand");
 
-      el.textContent = message;
-      el.className = error ? 'error' : '';
+    const rowsArea =
+      document.getElementById("rows");
+
+    const statusArea =
+      document.getElementById("status");
+
+    // --------------------------------------
+    // メッセージ表示
+    // --------------------------------------
+
+    function menuAdminStatus(
+      message,
+      type = ""
+    ) {
+      statusArea.textContent =
+        message || "";
+
+      statusArea.className =
+        "admin-message" +
+        (type ? " " + type : "");
     }
 
-    // 管理画面へのログイン
-    function load() {
-      const key = document.getElementById(
-        'key'
-      ).value.trim();
+    // --------------------------------------
+    // 処理中の操作を防ぐ
+    // --------------------------------------
+
+    function setMenuAdminBusy(busy) {
+      menuAdminBusy = busy;
+
+      document.querySelectorAll(
+        "button, #brand"
+      ).forEach(element => {
+        element.disabled = busy;
+      });
+    }
+
+    // --------------------------------------
+    // 管理画面データ取得
+    // --------------------------------------
+
+    async function loadMenuAdmin() {
+      if (menuAdminBusy) return;
+
+      const keyInput =
+        document.getElementById("key");
+
+      const key = keyInput.value.trim();
 
       if (!key) {
-        return state(
-          'アクセスキーを入力してください',
-          true
+        menuAdminStatus(
+          "管理用アクセスキーを入力してください。",
+          "error"
         );
+        return;
       }
 
-      google.script.run
-        .withSuccessHandler(data => {
-          current = data;
-          adminKey = key;
+      if (
+        typeof NaluMenuAPI === "undefined"
+      ) {
+        menuAdminStatus(
+          "api.jsを読み込めませんでした。",
+          "error"
+        );
+        return;
+      }
 
-          document.getElementById(
-            'key'
-          ).value = '';
+      setMenuAdminBusy(true);
 
-          document.getElementById(
-            'login'
-          ).hidden = true;
-
-          document.getElementById(
-            'panel'
-          ).hidden = false;
-
-          brandSelect.replaceChildren();
-
-          for (const brand of data.brands) {
-            const option = document.createElement(
-              'option'
-            );
-
-            option.value = brand.name;
-            option.textContent = brand.name;
-
-            brandSelect.append(option);
-          }
-
-          render();
-          state('');
-        })
-        .withFailureHandler(error => {
-          state(
-            error.message ||
-            '認証に失敗しました',
-            true
-          );
-        })
-        .getAdminData(key);
-    }
-
-    // プルダウン作成
-    function optionSelect(items, value) {
-      const select = document.createElement(
-        'select'
+      menuAdminStatus(
+        "メニュー情報を読み込んでいます…"
       );
 
-      const options = [
-        ...new Set([
-          '',
-          ...items,
-          value
-        ].filter(item => item !== undefined))
-      ];
+      try {
+        // 第1引数は既存APIで管理認証に
+        // 使用していないため空文字を渡す。
+        // 実際の管理認証はGAS側で実施。
+        const data =
+          await NaluMenuAPI.getAdminData(
+            "",
+            key
+          );
 
-      for (const item of options) {
-        const option = document.createElement(
-          'option'
+        if (
+          !data ||
+          !Array.isArray(data.brands) ||
+          !Array.isArray(data.dishes)
+        ) {
+          throw new Error(
+            "メニューデータの形式が不正です。"
+          );
+        }
+
+        menuAdminData = data;
+        menuAdminKey = key;
+
+        keyInput.value = "";
+
+        brandSelect.replaceChildren();
+
+        for (const brand of data.brands) {
+          const option =
+            document.createElement("option");
+
+          option.value = brand.name;
+          option.textContent = brand.name;
+
+          brandSelect.appendChild(option);
+        }
+
+        document.getElementById(
+          "login"
+        ).hidden = true;
+
+        document.getElementById(
+          "panel"
+        ).hidden = false;
+
+        renderMenuAdmin();
+
+        menuAdminStatus("");
+
+      } catch (error) {
+        menuAdminStatus(
+          "読み込みに失敗しました。\n" +
+          (error.message || String(error)),
+          "error"
         );
 
-        option.value = item;
-        option.textContent =
-          item || '選択してください';
+      } finally {
+        setMenuAdminBusy(false);
+      }
+    }
 
-        select.append(option);
+    // --------------------------------------
+    // プルダウン
+    // --------------------------------------
+
+    function makeMenuSelect(
+      items,
+      selectedValue
+    ) {
+      const select =
+        document.createElement("select");
+
+      const values = [
+        ...new Set([
+          "",
+          ...(Array.isArray(items)
+            ? items
+            : []),
+          selectedValue || ""
+        ])
+      ];
+
+      for (const value of values) {
+        const option =
+          document.createElement("option");
+
+        option.value = value;
+        option.textContent =
+          value || "選択してください";
+
+        select.appendChild(option);
       }
 
-      select.value = value || '';
+      select.value =
+        selectedValue || "";
 
       return select;
     }
 
-    function formField(label, input) {
-      const element = document.createElement(
-        'label'
+    function makeMenuField(
+      labelText,
+      element
+    ) {
+      const label =
+        document.createElement("label");
+
+      label.append(
+        document.createTextNode(labelText)
       );
 
-      element.textContent = label;
-      element.append(input);
+      label.append(element);
 
-      return element;
+      return label;
     }
 
-    // 選択ブランドの料理一覧
-    function render() {
-      const wrap = document.getElementById(
-        'rows'
+    // --------------------------------------
+    // ブランド別の料理表示
+    // --------------------------------------
+
+    function renderMenuAdmin() {
+      if (!menuAdminData) return;
+
+      rowsArea.replaceChildren();
+
+      const selectedBrand =
+        brandSelect.value;
+
+      const dishes =
+        menuAdminData.dishes
+          .filter(
+            dish =>
+              dish.brand === selectedBrand
+          )
+          .sort(
+            (a, b) =>
+              Number(a.order) -
+              Number(b.order)
+          );
+
+      dishes.forEach(
+        dish => createMenuDishRow(dish)
       );
 
-      wrap.replaceChildren();
+      renumberMenuDishes();
 
-      current.dishes
-        .filter(
-          dish => dish.brand === brandSelect.value
-        )
-        .sort(
-          (a, b) => a.order - b.order
-        )
-        .forEach(
-          dish => makeRow(dish)
+      if (!dishes.length) {
+        menuAdminStatus(
+          "このブランドにはまだ料理が登録されていません。"
+        );
+      } else {
+        menuAdminStatus("");
+      }
+    }
+
+    // --------------------------------------
+    // 料理編集行
+    // --------------------------------------
+
+    function createMenuDishRow(data) {
+      const box =
+        document.createElement("section");
+
+      box.className = "admin-row";
+
+      const heading =
+        document.createElement("div");
+
+      heading.className =
+        "admin-row-title";
+
+      const cols =
+        document.createElement("div");
+
+      cols.className = "cols";
+
+      // 表示順
+      const order =
+        document.createElement("input");
+
+      order.type = "number";
+      order.min = "1";
+      order.className = "order";
+      order.value = data.order || 1;
+
+      // カテゴリー
+      const category =
+        makeMenuSelect(
+          menuAdminData.options?.categories ||
+            [],
+          data.category || ""
         );
 
-      renumber();
-    }
+      category.className =
+        "category-field";
 
-    // 料理の編集欄を作成
-    function makeRow(data) {
-      const box = document.createElement('div');
-      box.className = 'admin-row';
+      // Nalu-09名称
+      const naluName =
+        makeMenuSelect(
+          menuAdminData.options?.naluNames ||
+            [],
+          data.naluName ||
+            "料理名を記載"
+        );
 
-      const cols = document.createElement('div');
-      cols.className = 'cols';
-
-      const order = document.createElement('input');
-
-      order.type = 'number';
-      order.min = '1';
-      order.value = data.order || 1;
-      order.className = 'order';
-
-      const category = optionSelect(
-        current.options.categories,
-        data.category
-      );
-
-      category.className = 'category-field';
-
-      const naluName = optionSelect(
-        current.options.naluNames,
-        data.naluName || '料理名を記載'
-      );
-
-      naluName.className = 'nalu-field';
+      naluName.className =
+        "nalu-field";
 
       cols.append(
-        formField('表示順', order),
-        formField('カテゴリー', category),
-        formField('Nalu-09の名称', naluName)
-      );
-
-      const name = document.createElement(
-        'textarea'
-      );
-
-      name.className = 'name-field';
-      name.value = data.name || '';
-
-      box.append(
-        cols,
-        formField(
-          '料理名（改行可）',
-          name
+        makeMenuField(
+          "表示順",
+          order
+        ),
+        makeMenuField(
+          "カテゴリー",
+          category
+        ),
+        makeMenuField(
+          "Nalu-09の名称",
+          naluName
         )
       );
 
-      const actions = document.createElement(
-        'div'
-      );
+      // 料理名
+      const dishName =
+        document.createElement(
+          "textarea"
+        );
 
-      actions.className = 'actions';
+      dishName.className =
+        "name-field";
 
-      // 上へ移動
-      const up = document.createElement(
-        'button'
-      );
+      dishName.rows = 4;
+      dishName.value = data.name || "";
 
-      up.textContent = '↑';
-      up.className = 'btn-secondary';
+      const actions =
+        document.createElement("div");
 
-      up.onclick = () => {
-        if (box.previousElementSibling) {
-          box.parentNode.insertBefore(
-            box,
-            box.previousElementSibling
-          );
+      actions.className = "actions";
+
+      // 上に移動
+      const up =
+        document.createElement("button");
+
+      up.type = "button";
+      up.className = "btn-secondary";
+      up.textContent = "↑ 上へ";
+
+      up.addEventListener(
+        "click",
+        () => {
+          const prev =
+            box.previousElementSibling;
+
+          if (prev) {
+            rowsArea.insertBefore(
+              box,
+              prev
+            );
+            renumberMenuDishes();
+          }
         }
-
-        renumber();
-      };
-
-      // 下へ移動
-      const down = document.createElement(
-        'button'
       );
 
-      down.textContent = '↓';
-      down.className = 'btn-secondary';
+      // 下に移動
+      const down =
+        document.createElement("button");
 
-      down.onclick = () => {
-        if (box.nextElementSibling) {
-          box.parentNode.insertBefore(
-            box.nextElementSibling,
-            box
-          );
+      down.type = "button";
+      down.className = "btn-secondary";
+      down.textContent = "↓ 下へ";
+
+      down.addEventListener(
+        "click",
+        () => {
+          const next =
+            box.nextElementSibling;
+
+          if (next) {
+            rowsArea.insertBefore(
+              next,
+              box
+            );
+            renumberMenuDishes();
+          }
         }
-
-        renumber();
-      };
+      );
 
       // 削除
-      const del = document.createElement(
-        'button'
+      const remove =
+        document.createElement("button");
+
+      remove.type = "button";
+      remove.className = "btn-danger";
+      remove.textContent = "削除";
+
+      remove.addEventListener(
+        "click",
+        () => {
+          if (
+            !confirm(
+              "この料理を編集画面から削除しますか？\n保存するとシートにも反映されます。"
+            )
+          ) {
+            return;
+          }
+
+          box.remove();
+          renumberMenuDishes();
+        }
       );
-
-      del.textContent = '削除';
-      del.className = 'btn-danger';
-
-      del.onclick = () => {
-        box.remove();
-        renumber();
-      };
 
       actions.append(
         up,
         down,
-        del
+        remove
       );
 
-      box.append(actions);
+      box.append(
+        heading,
+        cols,
+        makeMenuField(
+          "料理名（改行対応）",
+          dishName
+        ),
+        actions
+      );
 
-      document.getElementById(
-        'rows'
-      ).append(box);
+      rowsArea.append(box);
+
+      renumberMenuDishes();
     }
 
-    // 表示順を振り直す
-    function renumber() {
-      document.querySelectorAll(
-        '.admin-row .order'
-      ).forEach((input, i) => {
-        input.value = i + 1;
+    // --------------------------------------
+    // 表示順更新
+    // --------------------------------------
+
+    function renumberMenuDishes() {
+      rowsArea.querySelectorAll(
+        ".admin-row"
+      ).forEach((row, index) => {
+
+        const order =
+          row.querySelector(".order");
+
+        const heading =
+          row.querySelector(
+            ".admin-row-title"
+          );
+
+        if (order) {
+          order.value = index + 1;
+        }
+
+        if (heading) {
+          heading.textContent =
+            "Dish " +
+            String(index + 1).padStart(
+              2,
+              "0"
+            );
+        }
       });
     }
 
+    // --------------------------------------
     // 料理追加
-    function addDish() {
-      makeRow({
+    // --------------------------------------
+
+    function addMenuDish() {
+      if (!menuAdminData) return;
+
+      createMenuDishRow({
         order:
-          document.querySelectorAll(
-            '.admin-row'
+          rowsArea.querySelectorAll(
+            ".admin-row"
           ).length + 1,
 
-        category: '',
-        naluName: '料理名を記載',
-        name: ''
+        category: "",
+        naluName: "料理名を記載",
+        name: ""
       });
 
-      renumber();
+      renumberMenuDishes();
     }
 
-    // 保存
-    function save() {
-      const brand = brandSelect.value;
+    // --------------------------------------
+    // 編集中の料理データを収集
+    // --------------------------------------
 
-      const items = [
-        ...document.querySelectorAll(
-          '.admin-row'
+    function collectMenuDishes() {
+      return [
+        ...rowsArea.querySelectorAll(
+          ".admin-row"
         )
-      ].map((box, i) => ({
-        order: i + 1,
+      ].map((row, index) => ({
+        order: index + 1,
 
         category:
-          box.querySelector(
-            '.category-field'
+          row.querySelector(
+            ".category-field"
           ).value,
 
         naluName:
-          box.querySelector(
-            '.nalu-field'
+          row.querySelector(
+            ".nalu-field"
           ).value,
 
         name:
-          box.querySelector(
-            '.name-field'
+          row.querySelector(
+            ".name-field"
           ).value
       }));
+    }
 
+    // --------------------------------------
+    // 保存
+    // --------------------------------------
+
+    async function saveMenuAdmin() {
       if (
-        items.some(
-          item => !item.name.trim()
-        )
+        menuAdminBusy ||
+        !menuAdminData
       ) {
-        return state(
-          '料理名が空欄の行があります',
-          true
-        );
+        return;
       }
 
-      const confirmed = confirm(
-        `${brand} の料理を ${items.length} 件で更新します。よろしいですか？`
+      const brand =
+        brandSelect.value;
+
+      const dishes =
+        collectMenuDishes();
+
+      if (
+        dishes.some(
+          dish => !dish.name.trim()
+        )
+      ) {
+        menuAdminStatus(
+          "料理名が未入力の行があります。",
+          "error"
+        );
+        return;
+      }
+
+      if (
+        dishes.some(
+          dish => !dish.category
+        )
+      ) {
+        menuAdminStatus(
+          "カテゴリーを選択してください。",
+          "error"
+        );
+        return;
+      }
+
+      if (
+        !confirm(
+          brand +
+          " の料理 " +
+          dishes.length +
+          " 件を保存します。\n\n現在の登録内容が更新されます。よろしいですか？"
+        )
+      ) {
+        return;
+      }
+
+      setMenuAdminBusy(true);
+
+      menuAdminStatus(
+        "メニューを保存しています…"
       );
 
-      if (!confirmed) return;
-
-      state('保存中…');
-
-      google.script.run
-        .withSuccessHandler(info => {
-          state(
-            `${info.saved}件保存しました`
+      try {
+        const result =
+          await NaluMenuAPI.saveBrandMenu(
+            "",
+            menuAdminKey,
+            brand,
+            dishes
           );
 
-          google.script.run
-            .withSuccessHandler(data => {
-              current = data;
-              brandSelect.value = brand;
-              render();
-            })
-            .withFailureHandler(error => {
-              state(
-                error.message,
-                true
-              );
-            })
-            .getAdminData(adminKey);
-        })
-        .withFailureHandler(error => {
-          state(
-            error.message ||
-            '保存できませんでした',
-            true
+        // 保存後、最新データを再取得
+        const updated =
+          await NaluMenuAPI.getAdminData(
+            "",
+            menuAdminKey
           );
-        })
-        .saveBrandMenu(
-          adminKey,
-          brand,
-          items
+
+        menuAdminData = updated;
+        brandSelect.value = brand;
+
+        renderMenuAdmin();
+
+        menuAdminStatus(
+          (result.saved ?? dishes.length) +
+          "件の料理を保存しました。",
+          "success"
         );
+
+      } catch (error) {
+        menuAdminStatus(
+          "保存できませんでした。\n" +
+          (error.message || String(error)),
+          "error"
+        );
+
+      } finally {
+        setMenuAdminBusy(false);
+      }
     }
+
+    // --------------------------------------
+    // Enterキーでもログイン
+    // --------------------------------------
+
+    document.getElementById(
+      "key"
+    ).addEventListener(
+      "keydown",
+      event => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          loadMenuAdmin();
+        }
+      }
+    );
+
   </script>
 </body>
 </html>
