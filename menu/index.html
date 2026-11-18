@@ -1,0 +1,214 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <?!= include('Styles'); ?>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
+
+<body>
+  <main>
+    <div class="eyebrow">NALU — 09</div>
+
+    <div id="status">
+      LINE会員情報を確認しています…
+    </div>
+
+    <div id="content" hidden>
+      <div class="selector">
+        <label for="brand">
+          BRAND
+          <select id="brand"></select>
+        </label>
+      </div>
+
+      <h1 id="brandTitle"></h1>
+      <div class="subtitle">M E N U</div>
+      <div class="rule"></div>
+
+      <div id="dishes"></div>
+
+      <footer>Nalu-09</footer>
+    </div>
+  </main>
+
+  <script>
+    const LIFF_ID =
+      <?!= JSON.stringify(liffId) ?>;
+
+    let response = null;
+
+    function showStatus(message, error = false) {
+      const el = document.getElementById('status');
+
+      el.textContent = message;
+      el.className = error ? 'error' : '';
+      el.hidden = !message;
+    }
+
+    function render(name) {
+      const brand = response.brands.find(
+        item => item.name === name
+      );
+
+      if (!brand) return;
+
+      // ブランド別配色
+      const root = document.documentElement.style;
+
+      root.setProperty('--bg', brand.background);
+      root.setProperty('--ink', brand.foreground);
+      root.setProperty('--gold', brand.accent);
+      root.setProperty('--secondary', brand.secondary);
+
+      // ブランド別の日本語フォント
+      root.setProperty(
+        '--jp',
+        `'${brand.japaneseFont}', serif`
+      );
+
+      document.getElementById(
+        'brandTitle'
+      ).textContent = name;
+
+      const list = document.getElementById('dishes');
+      list.replaceChildren();
+
+      const items = response.dishes.filter(
+        item => item.brand === name
+      );
+
+      if (!items.length) {
+        const msg = document.createElement('p');
+
+        msg.textContent =
+          'メニューは準備中です';
+
+        list.append(msg);
+        return;
+      }
+
+      for (const item of items) {
+        const box = document.createElement('section');
+        box.className = 'dish';
+
+        // カテゴリー
+        if (item.category) {
+          const category = document.createElement('div');
+
+          category.className = 'category';
+          category.textContent = item.category;
+
+          box.append(category);
+        }
+
+        // Nalu-09独自名称
+        // 「料理名を記載」はサーバー側で空文字に変換済み
+        if (item.naluName) {
+          const nalu = document.createElement('div');
+
+          nalu.className = 'nalu-name';
+          nalu.textContent = item.naluName;
+
+          box.append(nalu);
+        }
+
+        // 料理名（改行対応）
+        const dish = document.createElement('div');
+
+        dish.className = 'dish-name';
+        dish.textContent = item.name;
+
+        box.append(dish);
+        list.append(box);
+      }
+    }
+
+    (async () => {
+      try {
+        if (!LIFF_ID) {
+          throw new Error(
+            'LIFF_ID が未設定です'
+          );
+        }
+
+        await liff.init({
+          liffId: LIFF_ID
+        });
+
+        if (!liff.isLoggedIn()) {
+          liff.login({
+            redirectUri: location.href
+          });
+          return;
+        }
+
+        const token = liff.getIDToken();
+
+        if (!token) {
+          throw new Error(
+            'LINEのIDトークンを取得できません'
+          );
+        }
+
+        google.script.run
+          .withSuccessHandler(data => {
+            response = data;
+
+            if (!data.brands.length) {
+              showStatus(
+                '閲覧可能なメニューはありません'
+              );
+              return;
+            }
+
+            const select = document.getElementById(
+              'brand'
+            );
+
+            for (const brand of data.brands) {
+              const option = document.createElement(
+                'option'
+              );
+
+              option.value = brand.name;
+              option.textContent = brand.name;
+
+              select.append(option);
+            }
+
+            select.addEventListener(
+              'change',
+              () => render(select.value)
+            );
+
+            select.value = data.brands[0].name;
+            render(select.value);
+
+            document.getElementById(
+              'content'
+            ).hidden = false;
+
+            showStatus('');
+          })
+          .withFailureHandler(error => {
+            showStatus(
+              error.message ||
+              'メニューを読み込めませんでした',
+              true
+            );
+          })
+          .getMemberMenu(token);
+
+      } catch (error) {
+        showStatus(
+          error.message ||
+          'ログインに失敗しました',
+          true
+        );
+      }
+    })();
+  </script>
+</body>
+</html>
