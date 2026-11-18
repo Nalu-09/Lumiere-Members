@@ -1,0 +1,251 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Shippori+Mincho:wght@400;500&family=Zen+Old+Mincho:wght@400;500&display=swap');
+
+/* 基本配色：Lumière French */
+:root {
+  --bg: #F7F5F0;
+  --ink: #302A26;
+  --gold: #A18D70;
+  --secondary: #746756;
+  --jp: 'Shippori Mincho', serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+body {
+  font-family: var(--jp);
+  transition:
+    background .25s,
+    color .25s;
+}
+
+/* メニュー全体 */
+main {
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 62px 25px 80px;
+  text-align: center;
+}
+
+/* Nalu-09表記 */
+.eyebrow {
+  color: var(--gold);
+  font: 400 12px/1.5
+    'Cormorant Garamond', serif;
+  letter-spacing: .28em;
+}
+
+/* ブランド名 */
+h1 {
+  font: 400 clamp(39px, 8vw, 56px)/1.15
+    'Cormorant Garamond', serif;
+  letter-spacing: .02em;
+  margin: 20px 0 14px;
+}
+
+/* MENU */
+.subtitle {
+  font: 400 15px
+    'Cormorant Garamond', serif;
+  letter-spacing: .3em;
+  color: var(--gold);
+}
+
+/* 装飾線 */
+.rule {
+  height: 1px;
+  background: var(--gold);
+  width: 42px;
+  margin: 24px auto 40px;
+  opacity: .8;
+}
+
+/* 各料理 */
+.dish {
+  margin: 0 0 44px;
+}
+
+/* カテゴリー：英語 */
+.category {
+  font: 400 21px/1.4
+    'Cormorant Garamond', serif;
+
+  color: var(--gold);
+  margin: 0 0 8px;
+}
+
+/* Nalu-09独自名称 */
+.nalu-name {
+  font: 400 14px/1.8 var(--jp);
+  color: var(--secondary);
+  margin-bottom: 8px;
+}
+
+/* 料理名 */
+.dish-name {
+  white-space: pre-line;
+
+  font: 400 15px/2 var(--jp);
+  letter-spacing: .035em;
+
+  overflow-wrap: anywhere;
+}
+
+/* 共通入力 */
+select,
+input,
+textarea,
+button {
+  font: inherit;
+}
+
+select,
+input,
+textarea {
+  width: 100%;
+  border: 1px solid #bdb7ad;
+  border-radius: 7px;
+  background: #fff;
+  color: #242424;
+  padding: 12px;
+  margin-top: 7px;
+}
+
+button {
+  border: 1px solid #a9997b;
+  background: #2b2a28;
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: .45;
+  cursor: default;
+}
+
+/* ブランド選択 */
+.selector {
+  max-width: 350px;
+  margin: 10px auto 30px;
+}
+
+label {
+  display: block;
+  text-align: left;
+  font-size: 13px;
+}
+
+/* メッセージ */
+#status {
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 20px auto;
+  white-space: pre-line;
+}
+
+#status.error {
+  color: #c16e54;
+}
+
+/* フッター */
+footer {
+  font: 400 14px
+    'Cormorant Garamond', serif;
+
+  letter-spacing: .12em;
+  color: var(--gold);
+  margin-top: 60px;
+}
+
+/* 管理画面 */
+.admin {
+  max-width: 920px;
+  text-align: left;
+  padding: 30px 20px 60px;
+  color: #232323;
+}
+
+.admin h1 {
+  font-size: 36px;
+}
+
+.admin small {
+  color: #555;
+}
+
+.admin-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.admin-row {
+  border: 1px solid #d4cec3;
+  border-radius: 10px;
+  padding: 18px;
+  margin: 12px 0;
+  background: #fff;
+}
+
+.admin-row .cols {
+  display: grid;
+  grid-template-columns: 90px 1fr 1fr;
+  gap: 12px;
+}
+
+.admin-row label {
+  font-size: 12px;
+}
+
+.admin-row textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.btn-secondary {
+  background: #fff;
+  color: #302A26;
+}
+
+.btn-danger {
+  border-color: #af7777;
+  color: #913d3d;
+  background: #fff;
+}
+
+/* スマートフォン */
+@media (max-width: 650px) {
+  .admin-row .cols {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-controls {
+    grid-template-columns: 1fr;
+  }
+
+  main {
+    padding-top: 42px;
+  }
+}
+</style>
