@@ -3,8 +3,9 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <?!= include('Styles'); ?>
+  <link rel="stylesheet" href="./style.css">
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script src="./api.js"></script>
 </head>
 
 <body>
@@ -34,8 +35,7 @@
   </main>
 
   <script>
-    const LIFF_ID =
-      <?!= JSON.stringify(liffId) ?>;
+    const LIFF_ID = "既存の会員証用LIFF_ID";
 
     let response = null;
 
@@ -152,59 +152,50 @@
           );
         }
 
-        google.script.run
-          .withSuccessHandler(data => {
-            response = data;
+        
+        try {
+          const data = await NaluMenuAPI.getMemberMenu(token);
 
-            if (!data.brands.length) {
-              showStatus(
-                '閲覧可能なメニューはありません'
-              );
-              return;
-            }
+          response = data;
 
-            const select = document.getElementById(
-              'brand'
-            );
+          if (!data.brands || !data.brands.length) {
+            showStatus('閲覧可能なメニューはありません');
+            return;
+          }
 
-            for (const brand of data.brands) {
-              const option = document.createElement(
-                'option'
-              );
+          const select = document.getElementById('brand');
+          select.replaceChildren();
 
-              option.value = brand.name;
-              option.textContent = brand.name;
+          for (const brand of data.brands) {
+            const option = document.createElement('option');
 
-              select.append(option);
-            }
+            option.value = brand.name;
+            option.textContent = brand.name;
 
-            select.addEventListener(
-              'change',
-              () => render(select.value)
-            );
+            select.append(option);
+          }
 
-            select.value = data.brands[0].name;
-            render(select.value);
+          select.addEventListener(
+            'change',
+            () => render(select.value)
+          );
 
-            document.getElementById(
-              'content'
-            ).hidden = false;
+          select.value = data.brands[0].name;
+          render(select.value);
 
-            showStatus('');
-          })
-          .withFailureHandler(error => {
-            showStatus(
-              error.message ||
-              'メニューを読み込めませんでした',
-              true
-            );
-          })
-          .getMemberMenu(token);
+          document.getElementById('content').hidden = false;
+          showStatus('');
+
+        } catch (error) {
+          showStatus(
+            error.message || 'メニューを読み込めませんでした',
+            true
+          );
+        }
 
       } catch (error) {
         showStatus(
-          error.message ||
-          'ログインに失敗しました',
+          error.message || 'ログインに失敗しました',
           true
         );
       }
