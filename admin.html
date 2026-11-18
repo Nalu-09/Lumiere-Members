@@ -373,6 +373,16 @@ color:#f3efe6;
   color:#fff;
   text-align:center;
 }
+
+    
+/* ==========================================
+   Nalu-09 メニュー管理
+========================================== */
+
+#menuManagement {
+  margin-top: 18px;
+}
+
     
   </style>
 </head>
@@ -405,13 +415,25 @@ color:#f3efe6;
     受付設定
   </button>
 
+  
   <button
     id="menuStatusManagement"
     onclick="loadStatusManagement()"
   >
     ステータスアップ
   </button>
+
+  <!-- Nalu-09 メニュー管理 -->
+  <button
+    id="menuManagement"
+    type="button"
+    onclick="openMenuManagement()"
+    style="display:none;"
+  >
+    メニュー管理
+  </button>
 </div>
+
 
       <div id="reservation" class="panel">
         <h2>Reservation</h2>
@@ -4247,13 +4269,28 @@ if (!data.ok) {
         : "none";
   }
 
+  
   if (statusManagement) {
     statusManagement.style.display =
       permissions.viewStatusManagement
         ? ""
         : "none";
   }
+
+  // メニュー管理ボタン
+  const menuManagement =
+    document.getElementById(
+      "menuManagement"
+    );
+
+  if (menuManagement) {
+    menuManagement.style.display =
+      permissions.approveStatusUp
+        ? ""
+        : "none";
+  }
 }
+
 
     function showMenuButtonByText(
   text
@@ -4275,6 +4312,57 @@ if (!data.ok) {
     }
   );
 }
+
+    
+/* ==========================================
+   Nalu-09 メニュー管理画面
+========================================== */
+
+// メニュー管理用GASのデプロイURL
+const NALU_MENU_ADMIN_URL =
+  "https://script.google.com/macros/s/ここにメニュー管理GASのデプロイID/exec?page=admin";
+
+function openMenuManagement() {
+
+  // 既存の管理者認証を確認
+  if (
+    !currentAdminAuth ||
+    !currentAdminIdToken
+  ) {
+    alert(
+      "管理者認証が確認できません。"
+    );
+    return;
+  }
+
+  const permissions =
+    currentAdminAuth.permissions || {};
+
+  // 暫定：既存の上位管理権限を利用
+  if (!permissions.approveStatusUp) {
+    alert(
+      "メニュー管理の利用権限がありません。"
+    );
+    return;
+  }
+
+  // URL未設定の場合は移動しない
+  if (
+    NALU_MENU_ADMIN_URL.includes(
+      "ここにメニュー管理GASのデプロイID"
+    )
+  ) {
+    alert(
+      "メニュー管理画面のURLが未設定です。"
+    );
+    return;
+  }
+
+  // メニュー管理画面を開く
+  window.location.href =
+    NALU_MENU_ADMIN_URL;
+}
+
 
     document.addEventListener(
   "DOMContentLoaded",
