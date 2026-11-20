@@ -154,7 +154,16 @@
 
         
         try {
-          const data = await NaluMenuAPI.getMemberMenu(token);
+          
+const requestedBrand = new URLSearchParams(
+  window.location.search
+).get("brand");
+
+const data =
+  requestedBrand === "Nalu Table"
+    ? await NaluMenuAPI.getNaluTableMenu(token)
+    : await NaluMenuAPI.getMemberMenu(token);
+
 
           response = data;
 
