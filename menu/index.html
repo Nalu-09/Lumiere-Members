@@ -16,13 +16,15 @@
       LINE会員情報を確認しています…
     </div>
 
-    <div id="content" hidden>
-      <div class="selector">
-        <label for="brand">
-          BRAND
-          <select id="brand"></select>
-        </label>
-      </div>
+    
+<div id="content" hidden>
+  <div id="brand-switcher" class="selector">
+    <label for="brand">
+      BRAND
+      <select id="brand"></select>
+    </label>
+  </div>
+
 
       <h1 id="brandTitle"></h1>
       <div class="subtitle">M E N U</div>
@@ -158,6 +160,16 @@
 const requestedBrand = new URLSearchParams(
   window.location.search
 ).get("brand");
+
+          
+const brandSwitcher =
+  document.getElementById("brand-switcher");
+
+if (brandSwitcher) {
+  brandSwitcher.hidden =
+    requestedBrand === "Nalu Table";
+}
+
 
 const data =
   requestedBrand === "Nalu Table"
