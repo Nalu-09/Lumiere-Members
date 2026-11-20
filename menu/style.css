@@ -248,4 +248,8 @@ footer {
     padding-top: 42px;
   }
 }
+
+#brand-switcher[hidden] {
+  display: none !important;
+}
 </style>
