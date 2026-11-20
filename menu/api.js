@@ -144,6 +144,14 @@ const NaluMenuAPI = (() => {
     });
   }
 
+  
+async function getNaluTableMenu(idToken) {
+  return request("getNaluTableMenu", {
+    idToken: idToken
+  });
+}
+
+
   // =========================================
   // 5. 管理画面データ取得
   // =========================================
@@ -190,6 +198,7 @@ const NaluMenuAPI = (() => {
     getLineIdToken,
     getMemberMenu,
     getAdminData,
+    getNaluTableMenu,
     saveBrandMenu
   });
 
