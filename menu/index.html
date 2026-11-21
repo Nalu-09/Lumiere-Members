@@ -38,6 +38,9 @@
 
   <script>
     const LIFF_ID = "2007730715-OucYSGdh";
+    
+const AUTH_RETRY_KEY = "nalu_menu_auth_retry";
+
 
     let response = null;
 
@@ -171,10 +174,41 @@ if (brandSwitcher) {
 }
 
 
-const data =
-  requestedBrand === "Nalu Table"
-    ? await NaluMenuAPI.getNaluTableMenu(token)
-    : await NaluMenuAPI.getMemberMenu(token);
+
+let data;
+
+try {
+  data =
+    requestedBrand === "Nalu Table"
+      ? await NaluMenuAPI.getNaluTableMenu(token)
+      : await NaluMenuAPI.getMemberMenu(token);
+
+  sessionStorage.removeItem(AUTH_RETRY_KEY);
+
+} catch (error) {
+  const message = String(error.message || "");
+
+  const isAuthError =
+    message.includes("LINE認証を確認できません") ||
+    message.includes("LINE認証の有効期限");
+
+  if (
+    isAuthError &&
+    !liff.isInClient() &&
+    sessionStorage.getItem(AUTH_RETRY_KEY) !== "1"
+  ) {
+    sessionStorage.setItem(AUTH_RETRY_KEY, "1");
+
+    liff.logout();
+    liff.login({
+      redirectUri: location.href
+    });
+    return;
+  }
+
+  throw error;
+}
+
 
 
           response = data;
